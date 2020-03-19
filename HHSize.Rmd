@@ -1,0 +1,63 @@
+---
+title: "ExPloratortydata_BA1"
+author: "Biraj ADhikari"
+date: "12/19/2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+Installation of packages and loading the data:
+```{r}
+library(ggplot2)
+library(dplyr)
+compdata = read.csv('D:/GMBA/6. Exploratory Data Analysis/CompiledData2.csv', header = TRUE, sep = ",")
+```
+
+Grouping Clean Sources of Electricity for Cooking (LPG, Biogas and Electricity) and non-clean sources of Electricity (wood, kerosene, dung)
+Also grouping ordinary and flush toilets into a toilets_yes variable,
+
+```{r}
+compdata2 = compdata %>% mutate(fuel_clean = (fuel_LPG + fuel_biogas + fuel_elect)) %>% mutate(fuel_nclean = (fuel_wood + fuel_kero + fuel_dung)) %>% mutate(toilet_yes = toilet_fl + toilet_ord)
+                                                                             
+```
+
+Histogram for the distribution of % of clean energy for cooking in Province 1
+```{r}
+ ggplot(data = compdata2, aes(x = fuel_clean)) + geom_histogram(bins = 10, color = "darkblue", fill = "lightblue") + ggtitle("Distribution of % of households that use clean Energy for cooking per district in Province 1")
+
+ggplot(data=compdata2, aes(x=toilet_yes)) + geom_histogram(bins=10,color="green", fill= "lightgreen") + ggtitle ("Distribution of % of households that have toilets per district in province 1")
+
+ggplot(data=compdata2, aes(x=hh_avgsize)) + geom_histogram(bins=10,color="yellow", fill= "blue") + ggtitle ("Distribution of household size for Province 1")
+
+```
+
+Summary statistics for household size grouped by district:
+```{r}
+compdata2 %>% group_by(District) %>% summarise(Avg.hhsize = mean(hh_avgsize)) %>% arrange(desc(Avg.hhsize))
+```
+
+The data therefore shows that Jhapa, Morang and Sunsari are districts that have highest clean sources of Electricity for Cooking, while Khotang is the lowest, with only 0.4% of households using clean source of cooking in 2011.
+
+Side-by-side Boxplots for Household size by District in Province 1
+```{r}
+ggplot(data = compdata2, aes(x = District, y = hh_avgsize, fill = District)) + geom_boxplot() + ggtitle("Side-by-side boxplots of Household size by District") + theme(legend.position = "right") +theme(axis.title.x = element_blank(), axis.text.x=element_blank(),
+       axis.ticks.x = element_blank())
+```
+
+Jhapa, Morang and Sunsari, three districts with highest rates of clean energy sources show high variability of data. There are three municipalities in Province 1 where the % of households that have clean energy access is higher than 50%. They are shown below:
+
+```{r}
+high_clean = compdata2 %>% filter(fuel_clean>0.5)
+high_clean$Municipality
+```
+
+The ten municipalities with the highest population are:
+
+```{r}
+pop_sorted = compdata2 %>% arrange(desc(Total.Population))
+head(pop_sorted$Municipality,10)
+```
+
+
+The 5 Municipaities with more than 50% access to clean energy are also the top ten most populated municipalities in province 1, which shows that clean energy access is most likely higher in high population municipalities (urban hubs). 
